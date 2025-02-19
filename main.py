@@ -101,7 +101,6 @@ if __name__ == "__main__":
                     prev_pag_2 = driver.current_window_handle
 
                     for year in years:
-
                         year_txt = year.find_element(
                             By.CLASS_NAME, "titulo-opcion-year"
                         ).text
@@ -149,13 +148,9 @@ if __name__ == "__main__":
                             # Cerrar la nueva pestaña y volver a la original (opcional)
                             driver.close()
                             driver.switch_to.window(prev_pag_2)
-                        # driver.switch_to.window(prev_pag_2)
+
                     driver.close()
                     driver.switch_to.window(prev_pag_1)
-
-                # driver.back()
-                # driver.switch_to.window(main_window)
-                # driver.back()
 
             except Exception as e:
                 print(f"Error en la sección: {str(e)}")
