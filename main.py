@@ -66,47 +66,40 @@ if __name__ == "__main__":
         wait = WebDriverWait(driver, 10)
         main_window = driver.current_window_handle
         secciones = driver.find_elements(
-            By.XPATH,
-            "//div[contains(@class, 'opcion-nueva')]",
+            By.CLASS_NAME,
+            "opcion-nueva",
         )
 
         for seccion in secciones:
             try:
                 # Encontrar el botón "Abrir" dentro de cada sección
                 btn_abrir = seccion.find_element(
-                    By.XPATH,
-                    ".//div[contains(@class, 'contenedor-ver-mas-opcion-nueva')]",
+                    By.CLASS_NAME,
+                    "contenedor-ver-mas-opcion-nueva",
                 )
-                category = seccion.find_element(
-                    By.XPATH, ".//div[contains(@class, 'id-tipo-documento')]"
-                ).text
+                category = seccion.find_element(By.CLASS_NAME, "id-tipo-documento").text
                 print(f"-> Consultando {category} ...")
 
                 # Hacer clic en el botón para expandir la sección
                 driver.execute_script("arguments[0].click();", btn_abrir)
                 time.sleep(1)  # Esperar a que cargue el contenido
                 prev_pag_1 = driver.current_window_handle
-                entidades = seccion.find_elements(
-                    By.XPATH, ".//div[contains(@class, 'opcion-entidad')]"
-                )
-                driver.switch_to()
+                entidades = seccion.find_elements(By.CLASS_NAME, "opcion-entidad")
+
                 for entidad in entidades:
                     name_entidad = entidad.find_element(
-                        By.XPATH, ".//div[contains(@class, 'id-entidad')]"
+                        By.CLASS_NAME, "id-entidad"
                     ).text
                     print(f"--> Abriendo {name_entidad} ...")
 
-                    btn_consultar = entidad.find_element(
-                        By.XPATH, ".//div[contains(@class, 'ver-mas-opcion-entidad')]"
-                    )
-
-                    # Hacer clic en el botón para expandir la entidad
-                    driver.execute_script("arguments[0].click();", btn_consultar)
-                    crr_link = driver.current_url
+                    href = entidad.find_element(By.TAG_NAME, "a").get_attribute("href")
+                    driver.execute_script(f"window.open('{href}', '_blank');")
                     time.sleep(1)  # Esperar a que cargue el contenido
+                    driver.switch_to.window(driver.window_handles[-1])
 
                     years = driver.find_elements(By.CLASS_NAME, "opcion-year")
                     prev_pag_2 = driver.current_window_handle
+
                     for year in years:
 
                         year_txt = year.find_element(
@@ -118,9 +111,6 @@ if __name__ == "__main__":
                         for doc in documentos:
                             extracted_data = {}
 
-                            btn_consultar = doc.find_element(
-                                By.XPATH, "//a[contains(@href, 'docs')]"
-                            )
                             doc_title = doc.find_element(
                                 By.CLASS_NAME, "id-documento"
                             ).text
@@ -129,10 +119,11 @@ if __name__ == "__main__":
                                 By.CLASS_NAME, "descripcion-documento"
                             ).text
 
-                            driver.execute_script(
-                                "arguments[0].click();", btn_consultar
+                            href = doc.find_element(By.TAG_NAME, "a").get_attribute(
+                                "href"
                             )
-                            # pasarse a la nueva ventana
+                            driver.execute_script(f"window.open('{href}', '_blank');")
+                            time.sleep(1)  # Esperar a que cargue el contenido
                             driver.switch_to.window(driver.window_handles[-1])
                             url = driver.current_url
 
@@ -157,10 +148,10 @@ if __name__ == "__main__":
                             save_on_db(cursor, extracted_data)
                             # Cerrar la nueva pestaña y volver a la original (opcional)
                             driver.close()
-                            # driver.switch_to.window(prev_pag_2)
+                            driver.switch_to.window(prev_pag_2)
                         # driver.switch_to.window(prev_pag_2)
+                    driver.close()
                     driver.switch_to.window(prev_pag_1)
-                    driver.back()
 
                 # driver.back()
                 # driver.switch_to.window(main_window)
