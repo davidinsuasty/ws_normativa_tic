@@ -28,7 +28,7 @@ def create_db(conn):
 def save_on_db(cursor, data):
     cursor.execute(
         """
-        INSERT INTO documents (id_doc, description, year, entidad, category, url_doc, text_doc)
+        INSERT OR IGNORE INTO documents (id_doc, description, year, entidad, category, url_doc, text_doc)
         VALUES (?,?,?,?,?,?,?)
         """,
         (
@@ -156,4 +156,6 @@ if __name__ == "__main__":
                 print(f"Error en la sección: {str(e)}")
     finally:
         # Cerrar el navegador
+        conn.commit()
+        conn.close()
         driver.quit()
