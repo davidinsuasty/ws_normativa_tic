@@ -98,32 +98,40 @@ if __name__ == "__main__":
                     time.sleep(1)  # Esperar a que cargue el contenido
                     driver.switch_to.window(driver.window_handles[-1])
                     ### modificar para el filtro de decretos
-
-                    if category == "Decretos":
+                    exist_btn_years = bool(
+                        driver.find_elements(By.CLASS_NAME, "boton-selector-year")
+                    )
+                    if exist_btn_years:
                         prev_pag_2 = driver.current_window_handle
                         btn_years = driver.find_element(
                             By.CLASS_NAME, "boton-selector-year"
                         )
                         btn_years.click()
                         time.sleep(1)
-                        year_texts = re.findall(
-                            r"\b(19\d{2}|20\d{2})\b", btn_years.text
-                        )
+                        year_texts = btn_years.text.split("\n")
+                        if year_texts[0] == "IR A AÑO":
+                            year_texts = [year_texts[1]]
+                        elif year_texts[0] == "FILTRAR POR AÑO":
+                            year_texts = year_texts[1:]
+
                     else:
-                        year_texts = ["", ""]
+                        year_texts = ["2025"]
 
                     #####
-                    for i in range(1, len(year_texts)):
-                        if category == "Decretos":
+                    for i, year_txt in enumerate(year_texts):
+                        if not re.match(r"^\d{4}$", year_txt):
+                            continue
+
+                        if exist_btn_years:
                             selector = driver.find_element(
                                 By.XPATH,
-                                f"/html/body/div[1]/div/main/div/div/nav/form/div/div/div[1]/div/div[2]/div[{i}]",
+                                f"/html/body/div[1]/div/main/div/div/nav/form/div/div/div[1]/div/div[2]/div[{i+1}]",
                             )
                             driver.execute_script("arguments[0].click();", selector)
                             time.sleep(1)
 
                         years = driver.find_elements(By.CLASS_NAME, "opcion-year")
-                        if category != "Decretos":
+                        if not exist_btn_years:
                             prev_pag_2 = driver.current_window_handle
 
                         for year in years:
